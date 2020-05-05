@@ -11,18 +11,34 @@ pub struct OutPin {
 type Error = io::Error;
 
 impl OutPin {
+    /// Calculates the pins number for usage with the export and unexport files found on the linux
+    /// system
     fn convert_to_absolute(port: u8, index: u8) -> u32 {
         let port = port as u32;
         let index = index as u32;
         let outnum = (port - 1) * 32 + index;
         outnum
     }
+
+    /// Resets the pins by unexporting the pins from userspace through its file interface, to reset its state, then configures a new
+    /// pin. This should make sure that the pin is usable.
+    ///
+    /// Note: It does not take into account if other
+    /// applications are using the pins or anything like that.
+    pub fn force_new(port: u8, index: u8) -> Result<Self, Error> {
+        let num = Self::convert_to_absolute(port, index);
+        let mut export = File::create("/sys/class/gpio/unexport")?;
+        export.write(num.to_string().as_bytes())?;
+
+        Self::new(port, index)
+    }
+
+    /// Tries to export and configure a new output pin, this can error out due to the pin already
+    /// configured, usually with a device or resource busy
     pub fn new(port: u8, index: u8) -> Result<Self, Error> {
         let num = Self::convert_to_absolute(port, index);
         let mut export = File::create("/sys/class/gpio/export")?;
         export.write(num.to_string().as_bytes())?;
-
-        std::thread::sleep_ms(1000);
 
         let mut direction = File::create(format!("/sys/class/gpio/gpio{}/direction", num))?;
         direction.write("out".as_bytes())?;
