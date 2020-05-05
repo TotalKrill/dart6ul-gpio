@@ -27,8 +27,9 @@ impl OutPin {
     /// applications are using the pins or anything like that.
     pub fn force_new(port: u8, index: u8) -> Result<Self, Error> {
         let num = Self::convert_to_absolute(port, index);
-        let mut export = File::create("/sys/class/gpio/unexport")?;
-        export.write(num.to_string().as_bytes())?;
+        if let Ok(mut export) = File::create("/sys/class/gpio/unexport") {
+            let _e = export.write(num.to_string().as_bytes());
+        }
 
         Self::new(port, index)
     }
