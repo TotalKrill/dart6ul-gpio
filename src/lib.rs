@@ -4,6 +4,7 @@ use std::io::prelude::*;
 
 pub use embedded_hal::digital::v2::OutputPin;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OutPin {
     num: u32,
 }
