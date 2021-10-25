@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
-
 mod input;
 mod output;
 
@@ -23,17 +22,25 @@ impl Pin {
         outnum
     }
 
+    /// Resets the pins by unexporting the pins from userspace through its file interface, to reset its state, then configures a new
+    /// pin. This should make sure that the pin is usable.
+    ///
+    /// Note: It does not take into account if other
+    /// applications are using the pins or anything like that.
+    pub(crate) fn force_reset(port: u8, index: u8) {
+        let num = Pin::convert_to_absolute(port, index);
+        Self::force_reset_abs(num);
+    }
+
+    /// Calls force_reset, but using the absolute pin number instead
     pub(crate) fn force_reset_abs(num: u32) {
         if let Ok(mut export) = File::create("/sys/class/gpio/unexport") {
             let _e = export.write(num.to_string().as_bytes());
         }
     }
 
-    pub(crate) fn force_reset(port: u8, index: u8) {
-        let num = Pin::convert_to_absolute(port, index);
-        Self::force_reset_abs(num);
-    }
-
+    /// Tries to export and configure a new output pin, this can error out due to the pin already
+    /// configured, usually with a device or resource busy
     pub(crate) fn init(port: u8, index: u8, direction: &str) -> Result<u32, Error> {
         let num = Self::convert_to_absolute(port, index);
         let mut export = File::create("/sys/class/gpio/export")?;

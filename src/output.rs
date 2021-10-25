@@ -10,11 +10,6 @@ pub struct OutPin {
 }
 
 impl OutPin {
-    /// Resets the pins by unexporting the pins from userspace through its file interface, to reset its state, then configures a new
-    /// pin. This should make sure that the pin is usable.
-    ///
-    /// Note: It does not take into account if other
-    /// applications are using the pins or anything like that.
     pub fn force_new(port: u8, index: u8) -> Result<Self, Error> {
         Pin::force_reset(port, index);
         Self::new(port, index)
@@ -27,6 +22,7 @@ impl OutPin {
         Ok(OutPin { num })
     }
 
+    /// Write to the output pin
     fn write_output(&mut self, value: &str) -> Result<(), Error> {
         let mut direction = File::create(format!("/sys/class/gpio/gpio{}/value", self.num))?;
         direction.write(value.as_bytes())?;

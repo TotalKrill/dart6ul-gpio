@@ -12,18 +12,11 @@ pub struct InPin {
 }
 
 impl InPin {
-    /// Resets the pins by unexporting the pins from userspace through its file interface, to reset its state, then configures a new
-    /// pin. This should make sure that the pin is usable.
-    ///
-    /// Note: It does not take into account if other
-    /// applications are using the pins or anything like that.
     pub fn force_new(port: u8, index: u8) -> Result<Self, Error> {
         Pin::force_reset(port, index);
         Self::new(port, index)
     }
 
-    /// Tries to export and configure a new output pin, this can error out due to the pin already
-    /// configured, usually with a device or resource busy
     pub fn new(port: u8, index: u8) -> Result<Self, Error> {
         let num = Pin::init(port, index, "in")?;
         Ok(InPin { num })
@@ -31,7 +24,7 @@ impl InPin {
 
     fn read_is_high(&self) -> Result<bool, Error> {
         // Read input from the sysfs interface
-        let mut value = File::create(format!("/sys/class/gpio/gpio{}/value", self.num))?;
+        let mut value = File::open(format!("/sys/class/gpio/gpio{}/value", self.num))?;
 
         // Read a byte from the file
         let buf = &mut [0u8; 1];
