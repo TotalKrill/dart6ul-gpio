@@ -4,6 +4,10 @@ use std::io::prelude::*;
 
 pub use embedded_hal::digital::v2::OutputPin;
 
+mod input;
+
+pub use input::*;
+
 type Error = io::Error;
 
 struct Pin;
