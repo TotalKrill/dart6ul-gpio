@@ -1,9 +1,9 @@
+pub use embedded_hal::digital::v2::InputPin;
+
 use std::{
     fs::File,
     io::{ErrorKind, Read},
 };
-
-pub use embedded_hal::digital::v2::InputPin;
 
 use crate::{Error, Pin};
 
